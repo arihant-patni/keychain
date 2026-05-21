@@ -1,0 +1,8 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd" >
+<suite name="demo suite" parallel="methods" thread-count="5">
+    <test name="demo tests">
+        <classes>
+            <class name="com.drive.keychain.apitests.SignUpTest" />
+        </classes>
+    </test>
+</suite>

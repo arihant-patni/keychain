@@ -12,6 +12,7 @@ To have a multimodule framework for backend automation where we can have rest ap
  - In this framework we have framework, which can be part of another repo in future and can be used as jar
  - Test suite
  - Rest controllers - With help of this if helpers need to be created as service for manual testing or data creation etc use cases.
+ - Auth Interceptor - For any api which needs authentication, we can use this interceptor to add auth header and token management logic in one place. This will help us to avoid code duplication and centralize auth logic.
 
 ## Project overview
 

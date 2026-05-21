@@ -1,5 +1,6 @@
 package com.drive.keychain.client;
 
+import com.drive.keychain.service.AuthService;
 import com.drive.keychain.util.ChainConstants;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -45,7 +46,7 @@ public class HttpClient {
      * @throws RuntimeException If the HTTP response code indicates an error (not 200/201).
      */
     public JsonObject send(String source, RequestMethod requestMethod, String contentType, String returnType, String body,
-                           String authorizationKey, boolean secure) throws IOException {
+                           String authorizationKey, boolean secure, boolean authRequired) throws IOException {
 
         // Validate required parameters
         if (source == null || source.isEmpty()) {
@@ -53,6 +54,11 @@ public class HttpClient {
         }
         if (requestMethod == null) {
             throw new IllegalArgumentException("Request method cannot be null");
+        }
+
+        //Auth interceptor
+        if (authRequired && (authorizationKey == null || authorizationKey.isEmpty())) {
+            authorizationKey = AuthService.getAuthHeader();
         }
 
         URL url = new URL(source);
@@ -75,7 +81,7 @@ public class HttpClient {
                 con.setRequestProperty(ChainConstants.HTTP_REQUEST_ACCEPT, returnType);
             }
 
-            if (authorizationKey != null && !authorizationKey.isEmpty()) {
+            if (authRequired || (authorizationKey != null && !authorizationKey.isEmpty())) {
                 con.setRequestProperty(ChainConstants.HTTP_REQUEST_AUTHORIZATION, authorizationKey);
             }
 

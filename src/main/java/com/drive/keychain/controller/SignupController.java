@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
  * Provides endpoints for creating, fetching, and managing todos.
  */
 @RestController
-public class TodoController {
+public class SignupController {
 
     private final ExternalApiConfig externalApiConfig = new ExternalApiConfig();
     private final HttpClient httpClient = new HttpClient();
