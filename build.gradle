@@ -1,0 +1,139 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '4.0.6'
+	id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'com.drive'
+version = '0.0.1-SNAPSHOT'
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(17)
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter'
+	  // Use Spring Boot's managed logging dependencies (do not force an older slf4j version)
+	implementation("org.springframework:spring-context:7.0.7")
+		testImplementation 'org.springframework.boot:spring-boot-starter-test'
+		testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+		testImplementation 'org.testng:testng:7.8.0'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	compileOnly("org.projectlombok:lombok:1.18.46")
+	annotationProcessor("org.projectlombok:lombok:1.18.46")
+
+	testCompileOnly("org.projectlombok:lombok:1.18.46")
+	testAnnotationProcessor("org.projectlombok:lombok:1.18.46")
+	implementation 'commons-io:commons-io:2.18.0'
+	implementation 'com.google.code.gson:gson:2.14.0'
+	implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+	// Use MySQL connector at runtime (replace H2 with MySQL)
+	// Use the official artifactId 'mysql-connector-java' (8.0.x is widely available on Maven Central)
+	runtimeOnly 'mysql:mysql-connector-java:8.0.33'
+	// Add H2 for in-memory tests (tests can still run against MySQL at runtime)
+	testImplementation 'com.h2database:h2:2.1.214'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
+
+// Ensure the bootJar has an explicit Start-Class in the manifest so running the JAR finds the main class
+bootJar {
+	manifest {
+		attributes 'Start-Class': 'com.drive.keychain.KeychainApplication'
+	}
+}
+
+// Also set springBoot mainClass explicitly to help the plugin discover the entry point
+springBoot {
+	mainClass = 'com.drive.keychain.KeychainApplication'
+}
+
+// Avoid generating the plain (non-executable) jar to prevent accidental execution of the wrong artifact
+tasks.named('jar') {
+	enabled = false
+}
+
+// Utility task to inspect the generated bootJar (lists entries and prints manifest)
+tasks.register('inspectJar') {
+	dependsOn bootJar
+	doLast {
+		def jarFile = bootJar.archiveFile.get().asFile
+		println "Inspecting JAR: ${jarFile.absolutePath}"
+		def jf = new java.util.jar.JarFile(jarFile)
+		println "--- Manifest ---"
+		jf.getManifest().getMainAttributes().forEach { k, v -> println "${k}: ${v}" }
+		println "--- Entries (showing com/drive/keychain/* and BOOT-INF/classes/com/drive/keychain/*) ---"
+		jf.stream().map { it.name }.filter { it.startsWith('com/drive/keychain/') }.sorted().forEach { println it }
+		println "--- BOOT-INF/classes entries ---"
+		jf.stream().map { it.name }.filter { it.startsWith('BOOT-INF/classes/com/drive/keychain/') }.sorted().forEach { println it }
+		jf.close()
+	}
+}
+
+// Simple task: Load properties from file (no validation, just load)
+tasks.register('loadExternalApiProperties') {
+	doLast {
+		def propsFile = file('src/main/resources/external-apis.properties')
+		
+		if (!propsFile.exists()) {
+			println "⚠️  WARNING: Properties file not found at ${propsFile.absolutePath}"
+			return
+		}
+
+		Properties props = new Properties()
+		propsFile.withInputStream { is ->
+			props.load(is)
+		}
+
+		println "\n📂 Loading properties from: ${propsFile.absolutePath}"
+		println "✅ Properties loaded successfully:"
+		props.each { k, v -> println "  $k = $v" }
+	}
+}
+
+// Load properties during build (runs before compiling)
+compileJava.dependsOn loadExternalApiProperties
+
+// Advanced: Load properties as Gradle extension (accessible from other tasks)
+tasks.register('loadPropertiesAsExtension') {
+	doLast {
+		def propsFile = file('src/main/resources/external-apis.properties')
+		
+		if (!propsFile.exists()) {
+			println "⚠️  Properties file not found, skipping extension"
+			return
+		}
+
+		Properties props = new Properties()
+		propsFile.withInputStream { is ->
+			props.load(is)
+		}
+
+		// Expose properties as project properties (accessible in other tasks)
+		props.each { k, v ->
+			project.ext[k] = v
+		}
+
+		println "\n🔧 Properties available as project extensions:"
+		props.each { k, v -> println "  \${project.ext['$k']} = $v" }
+	}
+}
+
+// Print all available properties (for debugging)
+tasks.register('printProperties') {
+	dependsOn loadPropertiesAsExtension
+	doLast {
+		println "\n📋 Available project properties:"
+		project.ext.properties.each { k, v -> println "  $k = $v" }
+	}
+}
+
+// (Removed automatic dependency-insertion helper; dependencies are declared explicitly above)
