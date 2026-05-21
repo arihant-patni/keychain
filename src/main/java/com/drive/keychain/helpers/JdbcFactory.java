@@ -1,7 +1,7 @@
 package com.drive.keychain.helpers;
 
 import com.drive.keychain.client.MysqlClient;
-import com.drive.keychain.repository.JdbcTodoRepository;
+import com.drive.keychain.repository.JdbcRepository;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
@@ -21,8 +21,8 @@ public final class JdbcFactory {
         return new MysqlClient(createJdbcTemplate(ds));
     }
 
-    public static JdbcTodoRepository createRepository(DataSource ds) {
-        return new JdbcTodoRepository(createJdbcClient(ds));
+    public static JdbcRepository createRepository(DataSource ds) {
+        return new JdbcRepository(createJdbcClient(ds));
     }
 }
 

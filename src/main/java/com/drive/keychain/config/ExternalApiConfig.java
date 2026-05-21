@@ -77,15 +77,15 @@ public class ExternalApiConfig {
     /**
      * Get the JSONPlaceholder base URL.
      */
-    public String getJsonPlaceholderBaseUrl() {
-        return props.getProperty("external.jsonplaceholder.base-url");
+    public String getBaseUrl() {
+        return props.getProperty("external.base-url");
     }
 
     /**
      * Get the JSONPlaceholder todos API base path (without parameters).
      */
-    public String getJsonPlaceholderTodosPath() {
-        return props.getProperty("external.jsonplaceholder.todos.path");
+    public String getSignUpPath() {
+        return props.getProperty("external.signup.path");
     }
 
     /**
@@ -140,15 +140,9 @@ public class ExternalApiConfig {
         return baseUrl + resultPath;
     }
 
-    /** Convenience: build the JSONPlaceholder todo URL by id. */
-    public String buildJsonPlaceholderTodoUrlById(Integer todoId) {
-        if (todoId == null) return null;
-        return buildUrl("external.jsonplaceholder.base-url","external.jsonplaceholder.todos.path", Map.of("id", String.valueOf(todoId)));
-    }
-
-    /** Convenience: build the JSONPlaceholder todo URL for Posting. */
-    public String buildJsonPlaceholderPostTodoUrl() {
-        return getJsonPlaceholderBaseUrl() + getJsonPlaceholderTodosPath();
+    /** Convenience: build the sign up url */
+    public String buildSignUpUrl() {
+        return getBaseUrl() + getSignUpPath();
     }
 
 }

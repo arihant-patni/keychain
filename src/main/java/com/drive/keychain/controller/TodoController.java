@@ -1,9 +1,10 @@
 package com.drive.keychain.controller;
 
-import com.drive.keychain.apitests.TodoApiHelper;
+import com.drive.keychain.apitests.SignUpHelper;
 import com.drive.keychain.client.HttpClient;
 import com.drive.keychain.config.ExternalApiConfig;
-import com.drive.keychain.model.Todo;
+import com.drive.keychain.model.SignUp;
+import com.drive.keychain.model.User;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -16,16 +17,19 @@ public class TodoController {
     private final ExternalApiConfig externalApiConfig = new ExternalApiConfig();
     private final HttpClient httpClient = new HttpClient();
 
-    private final TodoApiHelper todoApiHelper = new TodoApiHelper(externalApiConfig, httpClient);
+    private final SignUpHelper signUpHelper = new SignUpHelper(externalApiConfig, httpClient);
 
     /**
      * get a existing Todo.
      *
      * @return the existing Todo object
      */
-    @GetMapping("/get-todo")
-    public Todo createTodo() {
+    @GetMapping("/get-signup")
+    public SignUp createTodo() {
         externalApiConfig.load();
-        return todoApiHelper.fetchTodoById(1);
+        return signUpHelper.signUp(SignUp.builder().user(User.builder()
+                .password("passw0rd@123")
+                .username("user123")
+                .email("useraxrpj123@gmail.com").build()).build());
     }
 }

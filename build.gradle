@@ -38,6 +38,7 @@ dependencies {
 	runtimeOnly 'mysql:mysql-connector-java:8.0.33'
 	// Add H2 for in-memory tests (tests can still run against MySQL at runtime)
 	testImplementation 'com.h2database:h2:2.1.214'
+	testImplementation("org.testng:testng:7.12.0")
 }
 
 tasks.named('test') {
